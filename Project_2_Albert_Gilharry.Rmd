@@ -1,0 +1,131 @@
+---
+title: 'Project 2: Data Preparation & Transformation'
+author: "Albert Gilharry"
+date: "06 March 2018"
+output:
+  html_document:
+    css: ./css.css
+    highlight: pygments
+    pdf_document: default
+    theme: cerulean
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Set I - US Chronic Disease Indicators (CDI)
+
+<div id = "comment">
+This data set was posted by **Niteen Kumar**. "The dataset actually outlines how different states are impacted by certain types of disease category along with clear indicators such as alcohol use among youth, Binge drinking prevalence among adults aged ≥ 18 years, Heavy drinking among adults aged ≥ 18 years, Chronic liver disease mortality etc." 
+
+My goals with this data set are as follows: <br />
+
+  (-) **Load, Tidy, and transform the data set.** <br />
+  (-) **Investigate how each state and location are impacted by several types of chronic diseases.** <br />
+</div>
+
+
+## Load Libraries
+
+```{r load-libraries}
+library("tidyverse")
+library("stringr")
+library("DT")
+library("leaflet")
+library("geojsonio")
+```
+
+## Load Data
+```{r load-data}
+data <- read.csv("data/U.S._Chronic_Disease_Indicators__CDI.csv", sep = ",", header = TRUE, stringsAsFactors=FALSE,fileEncoding="UTF-8-BOM")
+```
+
+## Preview Data
+<div id = "solution">
+```{r preview-data}
+head(data)
+```
+
+```{r cols-data}
+ncol(data)
+```
+
+```{r rows-data}
+nrow(data)
+```
+
+</div>
+
+<div id = "comment">
+As we can see, this dataset is a very complex dataset, it has 19 columns, 53469 columns, and missing values.
+Further more, the variables aren't standardized. For example, the `Year` variable may contains a single year value, or a range of years. 
+The quantities in `DataValue` may be have different values, it may be per 100,000, nominal, etc. 
+
+I will focus on the prevelence of the different types  of cancer across states.
+</div>
+
+(1) Select only cases with a category of Cancer
+
+<div id = "solution">
+
+```{r filter-cancer}
+data <- filter(data,Category == "Cancer",)
+head(data)
+```
+</div>
+
+
+(2) Remove columns that are not needed for analysis.
+
+<div id = "solution">
+```{r select-cols}
+data <- select(data, Year, LocationAbbr, LocationDesc, Category, Indicator, DataValueUnit, DataValueType, DataValue, GeoLocation)
+datatable(data, options = list(filter = FALSE),filter="top")
+```
+</div>
+
+
+  (3) Mutate columns to extract latitude and longitude
+    ```{r}
+    
+    #data = 
+    #d = str_extract_all(data$GeoLocation, "-?[[:digit:]]*\\.[[:digit:]]*")
+    #coords = setNames(do.call(rbind.data.frame, d), c("lat", "long"))
+    #coords
+    #dataframe
+    #data.frame( transpose(d) )
+    #bind_cols(data,d[[1]])
+    
+    # From http://eric.clst.org/Stuff/USGeoJSON and
+    # https://en.wikipedia.org/wiki/List_of_United_States_counties_and_county_equivalents
+    nycounties <- geojsonio::geojson_read("data/states.json",
+      what = "sp")
+    # Or use the rgdal equivalent:
+    # nycounties <- rgdal::readOGR("json/nycounties.geojson", "OGRGeoJSON")
+    
+    pal <- colorNumeric("viridis", NULL)
+    
+    leaflet(nycounties) %>%
+      
+      addTiles() %>%
+      addPolygons(stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
+        fillColor = ~pal(log10(44)),
+        label = ~paste0(STATE, ": ", formatC(filter(data,LocationDesc == NAME,Indicator == 'Mammography use among women aged 50-74 years',DataValueType == 'Crude Prevalence')$DataValue, big.mark = ","))) %>%
+      addLegend(pal = pal, values = ~log10(filter(data,LocationDesc == NAME,Indicator == 'Mammography use among women aged 50-74 years',DataValueType == 'Crude Prevalence')$DataValue), opacity = 1.0,
+        labFormat = labelFormat(transform = function(x) round(10^x)))
+        
+    ```
+
+```{r}
+str_extract_all("(32.84057112200048, -86.63186076199969)", "-?[[:digit:]]*\\.[[:digit:]]*")[[1]][1]
+```
+
+```{r}
+tartu_map <- get_map(location = "40.206,-97.652", maptype = "roadmap", zoom = 4)
+ggmap(tartu_map, extent = "device") + geom_point(aes(x = lon, y = lat), colour = "red", 
+    alpha = 0.1, size = 2, data = tartu_housing_xy_wgs84_a)
+```
