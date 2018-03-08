@@ -13,7 +13,7 @@ output:
     toc: yes
 ---
 
-## Data Set I - US Chronic Disease Indicators (CDI)
+## Data Set II - Time Use by Gender and Country
 
 <div id = "comment">
 This data set was posted by **Nicholas Schettini**. "I found this dataset on time use by gender and by country.  Some of the variables include eating, sleeping, employment, travel, school, study, walking the dog, etc.  It seems you could analyze how males vs. females spend their time, and how each countries males and females compare to each other.  Maybe certain countries spend more time doing something more than another country; same goes for gender."
@@ -21,7 +21,8 @@ This data set was posted by **Nicholas Schettini**. "I found this dataset on tim
 My goals with this data set are as follows: <br />
 
   (-) **Load, Tidy, and transform the data set.** <br />
-  (-) **Investigate how each state and location are impacted by several types of chronic diseases.** <br />
+  (-) **Investigate the eating habits by gender and country.** <br />
+  (-) **Investigate the dish washing habits by gender and country.** <br />
 </div>
 
 
@@ -29,21 +30,19 @@ My goals with this data set are as follows: <br />
 
 ```{r load-libraries}
 library("tidyverse")
-library("stringr")
 library("DT")
-library("leaflet")
-library("geojsonio")
-library("ggplot2")
-library("fiftystater")
-library("colorplaner")
-library("mapproj")
-```
-## Load Data
-```{r load-data}
-data <- read.csv("data/TimeUse.csv", sep = ",", header = TRUE, stringsAsFactors=FALSE,fileEncoding="UTF-8-BOM")
 ```
 
+
+## Load Data
+
+```{r load-data}
+data <- read.csv("data/TimeUse.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE,fileEncoding = "UTF-8-BOM")
+```
+
+
 ## Preview Data
+
 <div id = "solution">
 ```{r preview-data}
 str(data)
@@ -51,23 +50,140 @@ str(data)
 </div>
 
 <div id ="comment">
-This data set has a a whopping 58 variables. Majority of them are activities of time spent. 
-The first order of business is convert this data set from a "wide" structure to a more tidy version.
+**This data set has a whopping 58 variables. Majority of them represent the time spent on certain activities. **<br />
+**The first order of business is to convert this data set from a "wide" structure to a more tidy version.**
 </div>
 
-## Tidy Data
+## Data Cleaning
 
+(1) **Use the `gather` function to create row inputs for these activities under a variable called `TimeSpent`.**
+
+<div id = "solution">
 ```{r}
 data <- gather(data, "Activity", "TimeSpent", 4:58)
+datatable(data, options = list(filter = FALSE),filter="top")
+```
+</div>
+
+
+<div id="comment">
+**The `TimeSpent` variable is not easily quantifiable, as it is not numerical.**<br />
+**The variable `Total` is not necessary anymore as it only shows the total hours in the day, but we will leave it as is.**<br />
+</div>
+
+(2) **Use `mutate` to create a variable that represents `TimeSpent` in minutes. **
+
+<div id="solution">
+```{r}
+data <- mutate(data, TimeSpentMinutes = strtoi(as.difftime(TimeSpent, format = "%H:%M", units = "mins")))
+datatable(data, options = list(filter = FALSE),filter="top")
+```
+</div>
+
+
+## Data Analysis
+
+(1) **Investigate the eating habits across gender and country.**
+
+<div id = "solution">
+```{r}
+
+pData <- select(data,everything()) %>% 
+          filter(`Activity` == 'Eating') %>% # filter data to get time spent eating
+          group_by(`GEO.ACL00`,`SEX`) %>% # group data by country, gender 
+          summarise(`time`=sum(`TimeSpentMinutes`) ) # calculate total minutes for each group 
+
+# plot the data, flip axis so the countries are legible
+ggplot(data = pData, aes(x = `GEO.ACL00`, y = `time`,fill=`SEX`, label = time)) + 
+                geom_bar(stat = "identity") + 
+                geom_text(size = 3, position = position_stack(vjust = 0.5)) + 
+                coord_flip() +
+                xlab("Country") +
+                ylab("Time Spent (minutes)") +
+                scale_fill_brewer(palette = "Set1") +
+                labs(title = "Timpe Spent Eating", fill = "Gender")
+
+```
+</div>
+
+<div id = "comment">
+**The plot shows that the French spend the most time eating, this is true for both males and females.**
+**Estonia spend the least time eating, for both males and females.**
+
+**Overall, do males or eat sleep more?**
+</div>
+
+<div id = "solution">
+**Total time spent eating - Males:**
+```{r}
+sum(filter(pData, SEX == 'Males')$time)
 ```
 
+**Total time spent eating - Females:**
+```{r}
+sum(filter(pData, SEX == 'Females')$time)
+```
+</div>
+
+<div id = "comment">
+Overall, males sleep more than females, but the difference is only 56 minutes.
+</div>
 
 
+(2) **Investigate the dish washing habits across gender and country.**
+
+<div id = "solution">
+```{r}
+
+pData <- select(data,everything()) %>% 
+          filter(`Activity` == 'Dish.washing') %>% # filter data to get time spent dish washing
+          group_by(`GEO.ACL00`,`SEX`) %>% # group data by country, gender 
+          summarise(`time`=sum(`TimeSpentMinutes`) ) # calculate total minutes for each group 
+
+# plot the data, flip axis so the countries are legible
+ggplot(data = pData, aes(x = `GEO.ACL00`, y = `time`,fill=`SEX`, label = time)) + 
+                geom_bar(stat = "identity") + 
+                geom_text(size = 3, position = position_stack(vjust = 0.5)) + 
+                coord_flip() +
+                xlab("Country") +
+                ylab("Time Spent (minutes)") +
+                scale_fill_brewer(palette = "Set2") +
+                labs(title = "Timpe Spent Dish Washing", fill = "Gender")
+
+```
+</div>
+
+<div id = "comment">
+**The plot shows that Italy and Bulgaria spend the most time dish washing.**
+
+**The most interesting (although not surprising) thing about this plot is the distribution of time spent dish washing across genders. **
+**What is the overall female to male ratio of time spent dish washing?**
+</div>
+
+<div id = "solution">
+```{r}
+sum(filter(pData, SEX == 'Females')$time)/sum(filter(pData, SEX == 'Males')$time)
+```
+</div>
+
+<div id = "comment">
+**Overall, there is a 4:1 female to male ratio of minutes spent doing dishes.**
+</div>
 
 
+## Conclusion
 
+<div id = "comment">
+**In conclusion the analysis show that overall males spend more time eating than females,**
+**but they seem to prefer the ladies do the dishes. Or maybe they wash dishes much faster than females?**
 
+**The results also show that these habits vary across both gender and country.**
+**Not surprisingly, habits vary across Europe, due to different cultures.**
 
+**It must be noted that this sample may not be representative of the European population.**
+
+**This was a very fun data set to work with!**
+</div>
 
 
 
