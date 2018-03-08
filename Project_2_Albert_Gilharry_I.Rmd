@@ -1,15 +1,15 @@
 ---
-title: 'Project 2: Data Preparation & Transformation'
+title: 'Project 2: Data Preparation & Transformation Pt. I'
 author: "Albert Gilharry"
 date: "06 March 2018"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     css: ./css.css
     highlight: pygments
     pdf_document: default
     theme: cerulean
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 

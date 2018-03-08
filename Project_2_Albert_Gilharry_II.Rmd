@@ -1,0 +1,80 @@
+---
+title: 'Project 2: Data Preparation & Transformation Pt. I'
+author: "Albert Gilharry"
+date: "06 March 2018"
+output:
+  html_document:
+    css: ./css.css
+    highlight: pygments
+    pdf_document: default
+    theme: cerulean
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+## Data Set I - US Chronic Disease Indicators (CDI)
+
+<div id = "comment">
+This data set was posted by **Nicholas Schettini**. "I found this dataset on time use by gender and by country.  Some of the variables include eating, sleeping, employment, travel, school, study, walking the dog, etc.  It seems you could analyze how males vs. females spend their time, and how each countries males and females compare to each other.  Maybe certain countries spend more time doing something more than another country; same goes for gender."
+
+My goals with this data set are as follows: <br />
+
+  (-) **Load, Tidy, and transform the data set.** <br />
+  (-) **Investigate how each state and location are impacted by several types of chronic diseases.** <br />
+</div>
+
+
+## Load Libraries
+
+```{r load-libraries}
+library("tidyverse")
+library("stringr")
+library("DT")
+library("leaflet")
+library("geojsonio")
+library("ggplot2")
+library("fiftystater")
+library("colorplaner")
+library("mapproj")
+```
+## Load Data
+```{r load-data}
+data <- read.csv("data/TimeUse.csv", sep = ",", header = TRUE, stringsAsFactors=FALSE,fileEncoding="UTF-8-BOM")
+```
+
+## Preview Data
+<div id = "solution">
+```{r preview-data}
+str(data)
+```
+</div>
+
+<div id ="comment">
+This data set has a a whopping 58 variables. Majority of them are activities of time spent. 
+The first order of business is convert this data set from a "wide" structure to a more tidy version.
+</div>
+
+## Tidy Data
+
+```{r}
+data <- gather(data, "Activity", "TimeSpent", 4:58)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
