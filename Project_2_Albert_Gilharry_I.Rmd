@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Data Set I - US Chronic Disease Indicators (CDI)
 
 <div id = "comment">
-This data set was posted by **Niteen Kumar**. "The dataset actually outlines how different states are impacted by certain types of disease category along with clear indicators such as alcohol use among youth, Binge drinking prevalence among adults aged ≥ 18 years, Heavy drinking among adults aged ≥ 18 years, Chronic liver disease mortality etc." 
+This data set was posted by **Niteen Kumar**. "The dataset actually outlines how different states are impacted by certain types of disease category along with clear indicators such as alcohol use among youth, Binge drinking prevalence among adults aged >= 18 years, Heavy drinking among adults aged >= 18 years, Chronic liver disease mortality etc." 
 
 My goals with this data set are as follows: <br />
 
@@ -48,26 +48,19 @@ library("mapproj")
 data <- read.csv("data/U.S._Chronic_Disease_Indicators__CDI.csv", sep = ",", header = TRUE, stringsAsFactors=FALSE,fileEncoding="UTF-8-BOM")
 ```
 
-## Preview Data
+## Preview Data Structure
 <div id = "solution">
 ```{r preview-data}
-head(data)
+str(data)
 ```
 
-```{r cols-data}
-ncol(data)
-```
-
-```{r rows-data}
-nrow(data)
-```
 
 </div>
 
 <div id = "comment">
-As we can see, this dataset is a very complex dataset, it has 19 columns, 53469 columns, and missing values.
-Further more, the variables aren't standardized. For example, the `Year` variable may contains a single year value, or a range of years. 
-The quantities in `DataValue` may be have different values, it may be per 100,000, nominal, etc. 
+As we can see, this dataset is very complex. It has 19 columns, 53469 rows, and missing values.
+Further more, the variables aren't standardized. For example, the `Year` variable may contain a single year value, or a range of years. 
+The values in `DataValue` may represent different quantities, it may be per 100,000, nominal, etc. 
 
 I will focus on the prevelence of alcohol related idicators accross different states.
 </div>
@@ -78,7 +71,6 @@ I will focus on the prevelence of alcohol related idicators accross different st
 
 ```{r filter-cancer}
 data <- filter(data,Category == "Alcohol")
-head(data)
 ```
 </div>
 
@@ -92,19 +84,20 @@ datatable(data, options = list(filter = FALSE),filter="top")
 ```
 </div>
 
-  (3) Create columns to extract latitude and longitude
-  
-  <div id = "comment">
-  Geospatial analysis typically requires separate structures for latitude and longitude. 
+<div id = "comment">
+  Geospatial analysis typically require separate structures for latitude and longitude. 
   We need to split the `GeoLocation` variable and remove additional punctuations to facilitate this.
   An example of a case of this variable is "(32.84057112200048, -86.63186076199969)"
-  </div>
+</div>
+  
+
+(3) Create separate columns to represent latitude and longitude.
   
 <div id = "solution">
 ```{r set-geo}
 data$lats <- str_extract_all( data$GeoLocation, "-?[[:digit:]]*\\.[[:digit:]]*" )[[1]]
 data$lons <- str_extract_all( data$GeoLocation, "-?[[:digit:]]*\\.[[:digit:]]*" )[[2]]
-data <- select(data, -GeoLocation)
+data <- select( data, -GeoLocation )
 ```
 </div>
 
@@ -112,7 +105,7 @@ data <- select(data, -GeoLocation)
 <div id = "solution">
 Preview coordinates
 ```{r view-geo}
-datatable(data, options = list(filter = FALSE),filter="top")
+datatable( data, options = list( filter = FALSE ), filter="top" )
 ```
 </div>
 
@@ -127,7 +120,7 @@ This would require grouping and summarizing before we can filter and map our ind
 I did not utilize the coordinates in this case. I used a package called `fifty_states`
 to get the boundaries for each state. I filtered the data to meet the requirements of the query to produce the map.
 
-This method can be used to plot most variables in dataset across states.
+This method can be used to map most variables in the data set.
 </div>
 
 ```{r map-indicator}
@@ -150,7 +143,7 @@ mapData <- data.frame( state = tolower(mapData$LocationDesc), mapData )
 # plot map
 p <- ggplot(mapData, aes(map_id = state)) + 
   # map points to the fifty_states shape data
-  geom_map(aes(fill = DataValue), map = fifty_states, size = 0.15,color = "#ffffff") + 
+  geom_map(aes(fill = DataValue), map = fifty_states, size = 0.15, color = "#ffffff") + 
   expand_limits(x = fifty_states$long, y = fifty_states$lat) +
   scale_fill_gradient2(name = dataValueType, midpoint = median(mapData$DataValue, na.rm = TRUE) ,
                        low = "blue", mid = "green",
@@ -166,12 +159,16 @@ p <- ggplot(mapData, aes(map_id = state)) +
 p + fifty_states_inset_boxes() 
 ```
 
+## Conclusion
+
 <div id = "comment"">
-The resulting map shows that binge drinking among adults is more prominent in the northern states. 
-North Dakota is the most prominent, could it be the cold weather blues?
+The map shows that binge drinking among adults is more prominent in the northern states. 
+North Dakota is the most prominent, could it be the cold weather blues? Even more alarming is the fact tha only a few states 
+have an age-adjusted prevalence below 40! It is important to note that The indicator does not convey the exact amount of alcohol consumed per day.
+So the values should be used with caution.
 
 
-This data set is very complex and I have only scratched the surface of its potential. 
+I have merely scratched the surface of this data set.
 The procedures above can be replicated to map and compare other indicators.
 
 

@@ -1,5 +1,5 @@
 ---
-title: 'Project 2: Data Preparation & Transformation Pt. I'
+title: 'Project 2: Data Preparation & Transformation Pt. III'
 author: "Albert Gilharry"
 date: "March 8, 2018"
 output:
@@ -37,8 +37,9 @@ As suggested by Raj, We can read this data into a data frame and subset the data
 My goals with this data set are as follows: <br />
 
   (-) **Load, Tidy, and transform the data.** <br />
-  (-) **Map child mortality for a given year** <br />
-  (-) **Create a time series plot of child mortality.** <br />
+  (-) **Map Infant Mortality Rate across the globe.** <br />
+  (-) **Map and compare the change in Infant Mortality Rates** <br />
+  (-) **Create time series plots of Infant Mortality for the extremes.** <br />
 </div>
 
 
@@ -48,8 +49,6 @@ My goals with this data set are as follows: <br />
 library("tidyverse")
 library("stringr")
 library("DT")
-
-library("ggplot2")
 library("rworldmap")
 ```
 
@@ -59,52 +58,162 @@ library("rworldmap")
 ```{r load-data}
 data <- read.csv("data/ChildMortality.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
 ```
+ 
+ 
+## Preview Data Structure
+
+<div id = "solution">
+```{r preview-data}
+str(data)
+```
+</div>
+
+<div id = "comment">
+The structure reveals a data set with 405 variables.
+Variables in the form `Under.five.Deaths.1955` will pose a problem for analysis because it represents two variables, category and  year. 
+</div>
+
+(1) Use the `gather` function to convert variables of the form `variable.name.year` to rows. 
+    This should result in a variable called `YearCat` (preserving the current format), and variable called `Rate`.
+
+<div id = "solution">
 ```{r}
 data <- gather(data, "YearCat", "Rate", 4:405)
 ```
+</div>
 
+(2) Split the `YearCat`variable into `Category` and `Year`.
+
+<div id = "solution">
 ```{r}
 data$Category <- str_sub(data$YearCat,1,-6)
 data$Year <- strtoi(str_sub(data$YearCat, -4))
+datatable( tail(data), options = list(filter = FALSE),filter="none" )
 ```
+</div>
 
+## Analysis
+
+(3) Map the Infant Mortality Rate for the year 1980 and, 2016, using the median.
+
+<div id = "solution">
 ```{r echo=TRUE}
-d <- filter(data, `Category` == "U5MR", `Uncertainty.bounds.` == "Lower", Year == 2000)
-    
-data(countryExData)
-sPDF <- joinCountryData2Map( d,joinCode = "ISO3", nameJoinColumn = "ISO.Code")
-#mapDevice() #create world map shaped window
-mapCountryData(sPDF,nameColumnToPlot='Rate',missingCountryCol = 'white')
-```
+# filter the data to match criteria
+mdata <- filter(data, `Category` == "IMR", `Uncertainty.bounds.` == "Median", Year == 1980)
 
+# match country polygon to country code in data set
+sPDF <- joinCountryData2Map( mdata,joinCode = "ISO3", nameJoinColumn = "ISO.Code")
+mapParams <- mapCountryData(sPDF,nameColumnToPlot='Rate',
+                            missingCountryCol = NA, 
+                            addLegend ='FALSE',
+                            mapTitle = "Infant Mortality Rate Per 1000 \n Year: 1980")
+
+do.call( addMapLegend, c( mapParams, legendLabels = "all", legendWidth = 1.5 ) )
+```
+</div>
+
+<div id = "solution">
+```{r echo=TRUE}
+# filter the data to match criteria
+mdata <- filter(data, `Category` == "IMR", `Uncertainty.bounds.` == "Median", Year == 2016)
+
+# match country polygon to country code in data set
+sPDF <- joinCountryData2Map( mdata,joinCode = "ISO3", nameJoinColumn = "ISO.Code")
+mapParams <- mapCountryData(sPDF,nameColumnToPlot='Rate',
+                            missingCountryCol = NA, 
+                            addLegend ='FALSE',
+                            mapTitle = "Infant Mortality Rate Per 1000 \n Year: 2016")
+
+do.call( addMapLegend, c( mapParams, legendLabels = "all", legendWidth = 1.5 ) )
+```
+</div>
+
+<div id = "comment">
+The maps show a stunning decrease in Infant Mortality Rates from 1980 to 2016.
+This is evident by looking at the scales, where the both minimum and maximum values decreased from 7.1 to 1.6 and 177 to 88.5 respectively.
+Africa is still plagued by relatively high infant mortaility rates after all those years.
+
+
+Europe, North America (excluding Mexico), Russia, and Australia have lowest rates. 
+China is the only "world power" with questionable Infant Mortality Rates.
+</div>
+
+(4) What about the change in Infant Mortality Rates accross the same time period?
+  
+<div id = "solution">
 ```{r}
-d <- filter(data, `Category` == "U5MR", `Uncertainty.bounds.` == "Lower", `ISO.Code` == "NLD" | `ISO.Code` == "ARG" , Rate != "")
-ggplot(d, aes(x = Year, y = Rate)) + 
-  geom_line(aes(color = `ISO.Code`), size = 1) +
-  #scale_color_manual(values = c("#00AFBB", "#E7B800")) +
-  theme_minimal()
+# calculate the difference in IMR between 1980 and 2016
+mData <- select(data, -YearCat) %>%
+          filter( `Category` == "IMR", `Uncertainty.bounds.` == "Median", Year == 1980 | Year == 2016  ) %>%
+          spread( Year, Rate )  %>%
+          mutate( ISO.Code = ISO.Code, Rate =  `1980` - `2016` )
+          
+# match country polygon to country code in data set
+sPDF <- joinCountryData2Map( data.frame(mData),joinCode = "ISO3", nameJoinColumn = "ISO.Code" )
+mapParams <- mapCountryData(sPDF,nameColumnToPlot='Rate',
+                            numCats = 50,
+                            missingCountryCol = NA, 
+                            colourPalette = 'diverging',
+                            addLegend ='FALSE',
+                            mapTitle = "Change in Infant Mortality Rate Per 1000 \n Year: 1980 - 2016")
+
+do.call( addMapLegend, c( mapParams, legendLabels = "all", legendWidth = 1.5 ) )
+
 ```
+</div>
+
+<div id = "comment">
+The map shows that the highest decreases in Infant Mortality Rates were in countries with previously very high rates.
+These are concentrated in Africa and the Middle-East. However, the map does a poor a job of displaying countries with
+increases in Infant Mortality Rates. The map legend suggests that at least one country had an increase in Infant Mortality of 16.3.
+</div>
 
 
+(5) Which countries had an increase in Infant Mortaility Rate from 1980 to 2016?
 
-
+<div id = "solution">
 ```{r}
-map.world <- map_data(map="world")
-
-#Add the data you want to map countries by to map.world
-#In this example, I add lengths of country names plus some offset
-map.world$name_len <- nchar(map.world$region) + sample(nrow(map.world))
-
-gg <- ggplot()
-gg <- gg + theme(legend.position="none")
-gg <- gg + geom_map(data=map.world, map=map.world, aes(map_id=region, x=long, y=lat, fill=name_len))
-
-gg <- gg + scale_fill_gradient(low = "green", high = "brown3", guide = "colourbar")
-gg <- gg + coord_equal()
-gg
+datatable(filter(mData, Rate < 0 ), options = list(filter = FALSE),filter="none")
 ```
+</div>
+
+<div id = "comment">
+**Dominica is the only country that had a higher Infant Mortality Rate in 2016 when compared to 1980!**
+</div>
 
 
+(6) Plot a times series chart for Infant Mortality Rate for the country with the highest and lowest increase over the period.
+
+<div id = "solution">
+```{r}
+pData <- filter(data, 
+                `ISO.Code` == arrange( mData, `Rate` )$`ISO.Code`[1] | `ISO.Code` == arrange( mData, desc( `Rate` ) )$`ISO.Code`[1], 
+                `Category` == "IMR", 
+                `Uncertainty.bounds.` == "Median",
+                !is.na(`Rate`) ) 
+                ggplot( pData, aes(x = Year, y = Rate) ) +
+                labs( title = "Infant Mortality Rate" ) +
+                geom_line( aes(color = `ISO.Code`), size = 1 )
+                
+
+```
+</div>
+
+<div id = "comment">
+The plots are almost the inverse of each other.
+Dominica's rate stablilized in the 1980's but began increasing at an alarming rate around 2005.
+Mozambique's rate trended downwards throughout. Mozambique probabilty had the largest deacrease due to its very high initial rate
+</div>
+
+
+## Conclusion
+
+<div id  = "comment">
+Much more can be done with this dataset. It would be interesting to have some relating fincancial/economic and management 
+data to guage the effectiveness of methodoligies used to combat the issue of Infant Mortality. 
+
+Tools in the Tidyverse were particularly useful when this data set ballooned from 585 to over 200,000 observations.
+</div>
 
 
 

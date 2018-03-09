@@ -1,5 +1,5 @@
 ---
-title: 'Project 2: Data Preparation & Transformation Pt. I'
+title: 'Project 2: Data Preparation & Transformation Pt. II'
 author: "Albert Gilharry"
 date: "06 March 2018"
 output:
@@ -101,7 +101,7 @@ ggplot(data = pData, aes(x = `GEO.ACL00`, y = `time`,fill=`SEX`, label = time)) 
                 xlab("Country") +
                 ylab("Time Spent (minutes)") +
                 scale_fill_brewer(palette = "Set1") +
-                labs(title = "Timpe Spent Eating", fill = "Gender")
+                labs(title = "Timp Spent Eating", fill = "Gender")
 
 ```
 </div>
@@ -148,7 +148,7 @@ ggplot(data = pData, aes(x = `GEO.ACL00`, y = `time`,fill=`SEX`, label = time)) 
                 xlab("Country") +
                 ylab("Time Spent (minutes)") +
                 scale_fill_brewer(palette = "Set2") +
-                labs(title = "Timpe Spent Dish Washing", fill = "Gender")
+                labs(title = "Time Spent Dish Washing", fill = "Gender")
 
 ```
 </div>
@@ -174,13 +174,13 @@ sum(filter(pData, SEX == 'Females')$time)/sum(filter(pData, SEX == 'Males')$time
 ## Conclusion
 
 <div id = "comment">
-**In conclusion the analysis show that overall males spend more time eating than females,**
-**but they seem to prefer the ladies do the dishes. Or maybe they wash dishes much faster than females?**
+**In conclusion the analysis show that overall, males spend more time eating than females,**
+**but they seem to prefer the ladies do the dishes. Maybe they clean the dishes very quickly?**
 
 **The results also show that these habits vary across both gender and country.**
 **Not surprisingly, habits vary across Europe, due to different cultures.**
 
-**It must be noted that this sample may not be representative of the European population.**
+**It must be noted that this small sample may not be representative of the European population.**
 
 **This was a very fun data set to work with!**
 </div>
