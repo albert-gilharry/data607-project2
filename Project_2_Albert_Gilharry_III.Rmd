@@ -1,0 +1,110 @@
+---
+title: 'Project 2: Data Preparation & Transformation Pt. I'
+author: "Albert Gilharry"
+date: "March 8, 2018"
+output:
+  html_document:
+    css: ./css.css
+    highlight: pygments
+    pdf_document: default
+    theme: cerulean
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Set III - Child Mortality
+
+<div id = "comment">
+This data set was posted by **Raj Kumar**. Childmortality.org is an organization that publishes Child Mortality estimates for all the countries around the world. They provide all available data and the latest child mortality estimates for each country based on the research of the UN Inter-agency Group for Child Mortality Estimation.
+
+The data is in a very wide format and contains six variables with values of interest. Each of these variables are concatinated to each year from 1950 to 2016, resulting in 405 columns. These key variables are
+
+Under-5 (0-4 years) mortality
+Infant (0-1 years) mortality
+Neonatal (0-1 month) mortality
+Number of under-5 deaths
+Number of infant deaths
+Number of neonatal deaths
+
+As suggested by Raj, We can read this data into a data frame and subset the data set to the median estimate for each country. We need to also handle null values of the data. Then we can convert this data into long format with 4 variables country, year, category and their respective value. This will make it easier to analyze the data."
+
+
+My goals with this data set are as follows: <br />
+
+  (-) **Load, Tidy, and transform the data.** <br />
+  (-) **Map child mortality for a given year** <br />
+  (-) **Create a time series plot of child mortality.** <br />
+</div>
+
+
+## Load Libraries
+
+```{r load-libraries}
+library("tidyverse")
+library("stringr")
+library("DT")
+
+library("ggplot2")
+library("rworldmap")
+```
+
+
+## Load Data
+
+```{r load-data}
+data <- read.csv("data/ChildMortality.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
+```
+```{r}
+data <- gather(data, "YearCat", "Rate", 4:405)
+```
+
+```{r}
+data$Category <- str_sub(data$YearCat,1,-6)
+data$Year <- strtoi(str_sub(data$YearCat, -4))
+```
+
+```{r echo=TRUE}
+d <- filter(data, `Category` == "U5MR", `Uncertainty.bounds.` == "Lower", Year == 2000)
+    
+data(countryExData)
+sPDF <- joinCountryData2Map( d,joinCode = "ISO3", nameJoinColumn = "ISO.Code")
+#mapDevice() #create world map shaped window
+mapCountryData(sPDF,nameColumnToPlot='Rate',missingCountryCol = 'white')
+```
+
+```{r}
+d <- filter(data, `Category` == "U5MR", `Uncertainty.bounds.` == "Lower", `ISO.Code` == "NLD" | `ISO.Code` == "ARG" , Rate != "")
+ggplot(d, aes(x = Year, y = Rate)) + 
+  geom_line(aes(color = `ISO.Code`), size = 1) +
+  #scale_color_manual(values = c("#00AFBB", "#E7B800")) +
+  theme_minimal()
+```
+
+
+
+
+```{r}
+map.world <- map_data(map="world")
+
+#Add the data you want to map countries by to map.world
+#In this example, I add lengths of country names plus some offset
+map.world$name_len <- nchar(map.world$region) + sample(nrow(map.world))
+
+gg <- ggplot()
+gg <- gg + theme(legend.position="none")
+gg <- gg + geom_map(data=map.world, map=map.world, aes(map_id=region, x=long, y=lat, fill=name_len))
+
+gg <- gg + scale_fill_gradient(low = "green", high = "brown3", guide = "colourbar")
+gg <- gg + coord_equal()
+gg
+```
+
+
+
+
+
