@@ -184,12 +184,12 @@ $(document).ready(function () {
 <div id="load-libraries" class="section level2">
 <h2>Load Libraries</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;tidyverse&quot;</span>)</code></pre></div>
-<pre><code>## -- Attaching packages ------------------------------------------------------------------------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>## -- Attaching packages ------------------------------------------------------------------------------------------------------------------------ tidyverse 1.2.1 --</code></pre>
 <pre><code>## v ggplot2 2.2.1     v purrr   0.2.4
 ## v tibble  1.4.2     v dplyr   0.7.4
-## v tidyr   0.7.2     v stringr 1.3.0
+## v tidyr   0.8.0     v stringr 1.2.0
 ## v readr   1.1.1     v forcats 0.2.0</code></pre>
-<pre><code>## -- Conflicts ---------------------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+<pre><code>## -- Conflicts --------------------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;stringr&quot;</span>)
@@ -325,8 +325,8 @@ $(document).ready(function () {
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data<span class="op">$</span>Category &lt;-<span class="st"> </span><span class="kw">str_sub</span>(data<span class="op">$</span>YearCat,<span class="dv">1</span>,<span class="op">-</span><span class="dv">6</span>)
 data<span class="op">$</span>Year &lt;-<span class="st"> </span><span class="kw">strtoi</span>(<span class="kw">str_sub</span>(data<span class="op">$</span>YearCat, <span class="op">-</span><span class="dv">4</span>))
 <span class="kw">datatable</span>( <span class="kw">tail</span>(data), <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">filter =</span> <span class="ot">FALSE</span>),<span class="dt">filter=</span><span class="st">&quot;none&quot;</span> )</code></pre></div>
-<div id="htmlwidget-05b46aaca9ff06147bcb" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-05b46aaca9ff06147bcb">{"x":{"filter":"none","data":[["235165","235166","235167","235168","235169","235170"],["ZMB","ZMB","ZMB","ZWE","ZWE","ZWE"],["Zambia","Zambia","Zambia","Zimbabwe","Zimbabwe","Zimbabwe"],["Lower","Median","Upper","Lower","Median","Upper"],["Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016"],[10239,14505,19954,9264,12246,15952],["Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths"],[2016,2016,2016,2016,2016,2016]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ISO.Code<\/th>\n      <th>CountryName<\/th>\n      <th>Uncertainty.bounds.<\/th>\n      <th>YearCat<\/th>\n      <th>Rate<\/th>\n      <th>Category<\/th>\n      <th>Year<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"filter":false,"columnDefs":[{"className":"dt-right","targets":[5,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-1f674c705030b876c18d" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1f674c705030b876c18d">{"x":{"filter":"none","data":[["235165","235166","235167","235168","235169","235170"],["ZMB","ZMB","ZMB","ZWE","ZWE","ZWE"],["Zambia","Zambia","Zambia","Zimbabwe","Zimbabwe","Zimbabwe"],["Lower","Median","Upper","Lower","Median","Upper"],["Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016","Neonatal.Deaths.2016"],[10239,14505,19954,9264,12246,15952],["Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths","Neonatal.Deaths"],[2016,2016,2016,2016,2016,2016]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ISO.Code<\/th>\n      <th>CountryName<\/th>\n      <th>Uncertainty.bounds.<\/th>\n      <th>YearCat<\/th>\n      <th>Rate<\/th>\n      <th>Category<\/th>\n      <th>Year<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"filter":false,"columnDefs":[{"className":"dt-right","targets":[5,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div id="analysis" class="section level2">
@@ -405,8 +405,8 @@ sPDF &lt;-<span class="st"> </span><span class="kw">joinCountryData2Map</span>( 
 </ol>
 <div id="solution">
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">datatable</span>(<span class="kw">filter</span>(mData, Rate <span class="op">&lt;</span><span class="st"> </span><span class="dv">0</span> ), <span class="dt">options =</span> <span class="kw">list</span>(<span class="dt">filter =</span> <span class="ot">FALSE</span>),<span class="dt">filter=</span><span class="st">&quot;none&quot;</span>)</code></pre></div>
-<div id="htmlwidget-9c6f12f51ccacac604cf" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-9c6f12f51ccacac604cf">{"x":{"filter":"none","data":[["1"],["DMA"],["Dominica"],["Median"],["IMR"],[14.9],[31.2],[-16.3]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ISO.Code<\/th>\n      <th>CountryName<\/th>\n      <th>Uncertainty.bounds.<\/th>\n      <th>Category<\/th>\n      <th>1980<\/th>\n      <th>2016<\/th>\n      <th>Rate<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"filter":false,"columnDefs":[{"className":"dt-right","targets":[5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0b1b6610404bf91c9e3f" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0b1b6610404bf91c9e3f">{"x":{"filter":"none","data":[["1"],["DMA"],["Dominica"],["Median"],["IMR"],[14.9],[31.2],[-16.3]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ISO.Code<\/th>\n      <th>CountryName<\/th>\n      <th>Uncertainty.bounds.<\/th>\n      <th>Category<\/th>\n      <th>1980<\/th>\n      <th>2016<\/th>\n      <th>Rate<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"filter":false,"columnDefs":[{"className":"dt-right","targets":[5,6,7]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 <div id="comment">
 <p><strong>Dominica is the only country that had a higher Infant Mortality Rate in 2016 when compared to 1980!</strong></p>
